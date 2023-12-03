@@ -23,3 +23,45 @@ target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
 include(CTest)
 include(Catch)
 catch_discover_tests(tests)
+
+function(add_test_incl_memcheck TARGET_NAME)
+    # Set default values for SOURCE_FILES and LIBRARIES if not provided
+    set(DEFAULT_SOURCE_FILES "")
+    set(DEFAULT_LIBRARIES "")
+
+    # Parse the arguments
+    cmake_parse_arguments(CREATE_TARGET "" "" "SOURCE_FILES;LIBRARIES" ${ARGN})
+
+    # If SOURCE_FILES or LIBRARIES were not provided, use default values
+    if(NOT CREATE_TARGET_SOURCE_FILES)
+        set(CREATE_TARGET_SOURCE_FILES ${DEFAULT_SOURCE_FILES})
+    endif()
+
+    if(NOT CREATE_TARGET_LIBRARIES)
+        set(CREATE_TARGET_LIBRARIES ${DEFAULT_LIBRARIES})
+    endif()
+
+    add_executable(${TARGET_NAME}_test
+            ${CREATE_TARGET_SOURCE_FILES}
+    )
+    target_link_libraries(${TARGET_NAME}_test PRIVATE
+            Catch2::Catch2WithMain
+            ${CREATE_TARGET_LIBRARIES})
+
+    add_test(NAME ${TARGET_NAME}_test COMMAND ${TARGET_NAME}_test)
+    add_test(NAME ${TARGET_NAME}_memchecked_test
+            COMMAND valgrind
+            --error-exitcode=1
+            --tool=memcheck
+            --leak-check=full
+            --errors-for-leak-kinds=definite
+            --show-leak-kinds=definite $<TARGET_FILE:${TARGET_NAME}_test>
+            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+endfunction()
+
+add_test_incl_memcheck(tests
+    SOURCE_FILES
+        tests.cpp
+    LIBRARIES
+        Catch2::Catch2WithMain
+)
