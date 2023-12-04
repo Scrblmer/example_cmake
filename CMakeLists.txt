@@ -60,6 +60,10 @@ function(add_test_incl_memcheck TARGET_NAME)
             --errors-for-leak-kinds=definite
             --show-leak-kinds=definite $<TARGET_FILE:${TARGET_NAME}_test>
             WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+
+    # Add label "valgrind" to the memcheck test
+    set_tests_properties(${TARGET_NAME}_memchecked_test PROPERTIES
+            LABELS valgrind)
 endfunction()
 
 add_test_incl_memcheck(tests

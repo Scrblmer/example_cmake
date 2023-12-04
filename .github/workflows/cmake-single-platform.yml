@@ -38,8 +38,12 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: ninja
 
-    - name: Test
+    - name: Tests without valgrind
       working-directory: ${{runner.workspace}}/build
       # Execute tests defined by the CMake configuration.
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
+      run: ctest -C ${{env.BUILD_TYPE}} -LE valgrind
+
+    - name: Tests with valgrind
+      working-directory: ${{runner.workspace}}/build
+      run: ctest -C ${{env.BUILD_TYPE}} -L valgrind
