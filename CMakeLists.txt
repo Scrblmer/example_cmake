@@ -19,6 +19,9 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(tests tests.cpp)
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
 
+# disable creating extra catch targets
+set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
+
 # test registration
 include(CTest)
 include(Catch)
